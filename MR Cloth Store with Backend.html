@@ -1,0 +1,1147 @@
+<!--   php -S localhost:8000  -->      
+<!--  http://localhost:8000/MR Cloth Store with Backend.html  -->
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RM Store - Online Shopping</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        
+        * {
+            
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 0 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+            transition: all 0.5s ease-out;
+        }
+        .logo:hover{
+            transform: scale(1.1);
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-menu a:hover {
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .cart-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .cart-btn:hover {
+            background: #5a6fd8;
+            transform: scale(1.05);
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+            padding: 2rem 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .page {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Home Page */
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        /* UPDATED: CSS for product image tag */
+        .product-image-container {
+            height: 280px;
+            background-color: #f4f4f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Use 'cover' to fill the space, or 'contain' to show the whole image */
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+
+        .product-info {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; /* Allows this section to grow and push the button down */
+        }
+
+        .product-info h3 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .product-info-main {
+            flex-grow: 1;
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-top: auto; /* Pushes button to the bottom */
+        }
+
+        .add-to-cart:hover {
+            background: #5a6fd8;
+            transform: scale(1.02);
+        }
+
+        /* Forms */
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        /* Cart */
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+        }
+
+        .cart-total {
+            text-align: right;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 1rem;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quantity-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Account Page */
+        .user-info {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .user-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+        }
+        
+        .account-section {
+            display: none;
+        }
+
+        .account-tab {
+            background: transparent;
+            color: #555;
+            border: 2px solid #e0e0e0;
+            padding: 0.6rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .account-tab:hover {
+            background: #f0f2f5;
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .account-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Responsive Design */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+                padding: 1rem 0;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1rem;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .nav-container {
+                padding: 0 1rem;
+            }
+        }
+
+        /* Animations */
+        .bounce {
+            animation: bounce 0.3s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 1001;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo" onclick="showPage('home')">
+                <img src="img/logo.png" alt="RM Store Logo" style="height: 90px;">
+            </a>
+            
+            <ul class="nav-menu" id="nav-menu">
+                <li><a href="#home" onclick="showPage('home')">Home</a></li>
+                <li><a href="#products" onclick="showPage('products')">Products</a></li>
+                <li><a href="#wishlist" onclick="showPage('wishlist')" id="wishlist-link">Wishlist</a></li>
+                <li><a href="#contact" onclick="showPage('contact')">Contact</a></li>
+                <li><a href="#about" onclick="showPage('about')">About</a></li>
+                <li><a href="#account" onclick="showPage('account')" id="account-link">Account</a></li>
+                <li><a href="#login" onclick="showPage('login')" id="auth-link">Login</a></li>
+            </ul>
+            
+            <div class="nav-actions">
+                <div class="search-container" style="margin-right: 1rem;">
+                    <input type="text" id="search-input" placeholder="Search products..." style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 20px; width: 200px;">
+                </div>
+                <button class="cart-btn" onclick="showPage('cart')">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cart-count">0</span>
+                </button>
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="container">
+            <div id="home" class="page active">
+                <div class="hero">
+                    <h1>Welcome to RM Store</h1>
+                    <p>Discover the latest fashion trends and premium quality clothing</p>
+                    <div style="margin-top: 2rem;">
+                        <button class="btn" onclick="showPage('products')">Shop Now</button>
+                        <button class="btn btn-secondary" onclick="showPage('about')" style="margin-left: 1rem;">Learn More</button>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="text-align: center; margin-bottom: 1rem;">Featured Categories</h3>
+                    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+                        <button class="btn" onclick="filterByCategory('all'); showPage('products')">All</button>
+                        <button class="btn" onclick="filterByCategory('casual'); showPage('products')">Casual</button>
+                        <button class="btn" onclick="filterByCategory('formal'); showPage('products')">Formal</button>
+                        <button class="btn" onclick="filterByCategory('outerwear'); showPage('products')">Outerwear</button>
+                        <button class="btn" onclick="filterByCategory('shoes'); showPage('products')">Shoes</button>
+                    </div>
+                </div>
+                
+                <h3 style="text-align: center; margin-bottom: 1rem;">Featured Products</h3>
+                <div class="products-grid" id="featured-products-grid">
+                    </div>
+                
+                <div style="background: white; padding: 2rem; border-radius: 15px; margin-top: 3rem; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 1rem;">Stay Updated</h3>
+                    <p style="margin-bottom: 1.5rem; color: #666;">Subscribe to our newsletter for the latest fashion updates and exclusive offers!</p>
+                    <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                        <input type="email" id="newsletter-email" placeholder="Enter your email" style="padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 10px; flex: 1; max-width: 300px;">
+                        <button class="btn" onclick="subscribeNewsletter()">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="products" class="page">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap;">
+                    <h2 style="color: #333;">Our Products</h2>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button class="btn" onclick="filterByCategory('all')" style="padding: 0.5rem 1rem;">All</button>
+                        <button class="btn" onclick="filterByCategory('casual')" style="padding: 0.5rem 1rem;">Casual</button>
+                        <button class="btn" onclick="filterByCategory('formal')" style="padding: 0.5rem 1rem;">Formal</button>
+                        <button class="btn" onclick="filterByCategory('outerwear')" style="padding: 0.5rem 1rem;">Outerwear</button>
+                        <button class="btn" onclick="filterByCategory('dresses')" style="padding: 0.5rem 1rem;">Dresses</button>
+                        <button class="btn" onclick="filterByCategory('shoes')" style="padding: 0.5rem 1rem;">Shoes</button>
+                    </div>
+                </div>
+                
+                <div class="products-grid" id="products-grid"></div>
+            </div>
+
+            <div id="wishlist" class="page">
+                <h2 style="margin-bottom: 2rem; color: #333;">My Wishlist</h2>
+                <div id="wishlist-items"></div>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn" onclick="showPage('products')">Continue Shopping</button>
+                </div>
+            </div>
+
+            <div id="contact" class="page">
+                <h2 style="margin-bottom: 2rem; color: #333; text-align: center;">Contact Us</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 1.5rem;">Send us a message</h3>
+                        <form id="contact-form">
+                            <div class="form-group"><label for="contact-name">Name</label><input type="text" id="contact-name" required></div>
+                            <div class="form-group"><label for="contact-email">Email</label><input type="email" id="contact-email" required></div>
+                            <div class="form-group"><label for="contact-subject">Subject</label><input type="text" id="contact-subject" required></div>
+                            <div class="form-group"><label for="contact-message">Message</label><textarea id="contact-message" rows="5" style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 10px; font-family: inherit; resize: vertical;" required></textarea></div>
+                            <button type="button" class="btn" onclick="submitContact()">Send Message</button>
+                        </form>
+                    </div>
+                    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 1.5rem;">Get in touch</h3>
+                        <div style="margin-bottom: 2rem;">
+                            <div style="display: flex; align-items: center; margin-bottom: 1rem;"><i class="fas fa-map-marker-alt" style="font-size: 1.2rem; color: #667eea; margin-right: 1rem; width: 20px;"></i><div><strong>Address</strong><br>123 Fashion Street, Ahmedabad, GJ 380001</div></div>
+                            <div style="display: flex; align-items: center; margin-bottom: 1rem;"><i class="fas fa-phone" style="font-size: 1.2rem; color: #667eea; margin-right: 1rem; width: 20px;"></i><div><strong>Phone</strong><br>+91 (555) 123-4567</div></div>
+                            <div style="display: flex; align-items: center; margin-bottom: 1rem;"><i class="fas fa-envelope" style="font-size: 1.2rem; color: #667eea; margin-right: 1rem; width: 20px;"></i><div><strong>Email</strong><br>info@rmstore.com</div></div>
+                            <div style="display: flex; align-items: center; margin-bottom: 1rem;"><i class="fas fa-clock" style="font-size: 1.2rem; color: #667eea; margin-right: 1rem; width: 20px;"></i><div><strong>Hours</strong><br>Mon-Fri: 9AM-8PM<br>Sat-Sun: 10AM-6PM</div></div>
+                        </div>
+                        <div style="border-top: 1px solid #e0e0e0; padding-top: 1.5rem;">
+                            <h4 style="margin-bottom: 1rem;">Follow Us</h4>
+                            <div style="display: flex; gap: 1rem;">
+                                <a href="#" style="color: #667eea; font-size: 1.5rem; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"><i class="fab fa-facebook"></i></a>
+                                <a href="https://www.instagram.com/mangroliya_rudra/?next=%2F&hl=en" style="color: #667eea; font-size: 1.5rem; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"><i class="fab fa-instagram"></i></a>
+                                <a href="#" style="color: #667eea; font-size: 1.5rem; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"><i class="fab fa-twitter"></i></a>
+                                <a href="#" style="color: #667eea; font-size: 1.5rem; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"><i class="fab fa-youtube"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="login" class="page">
+                <div class="form-container">
+                    <h2 style="text-align: center; margin-bottom: 2rem; color: #333;">Login to Your Account</h2>
+                    <form id="login-form">
+                        <div class="form-group"><label for="email">Email</label><input type="email" id="email" required></div>
+                        <div class="form-group"><label for="password">Password</label><input type="password" id="password" required></div>
+                        <div style="text-align: center;">
+                            <button type="submit" class="btn">Login</button>
+                            <button type="button" class="btn btn-secondary" onclick="showRegister()" style="margin-left: 1rem;">Register</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="register" class="page">
+                <div class="form-container">
+                    <h2 style="text-align: center; margin-bottom: 2rem; color: #333;">Create Account</h2>
+                    <form id="register-form">
+                        <div class="form-group"><label for="reg-name">Full Name</label><input type="text" id="reg-name" required></div>
+                        <div class="form-group"><label for="reg-email">Email</label><input type="email" id="reg-email" required></div>
+                        <div class="form-group"><label for="reg-password">Password</label><input type="password" id="reg-password" required></div>
+                        <div class="form-group"><label for="reg-phone">Phone Number</label><input type="tel" id="reg-phone" required></div>
+                        <div style="text-align: center;">
+                            <button type="submit" class="btn">Register</button>
+                            <button type="button" class="btn btn-secondary" onclick="showLogin()" style="margin-left: 1rem;">Back to Login</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="account" class="page">
+                <div class="user-info">
+                    <div class="user-avatar"><i class="fas fa-user"></i></div>
+                    <h2 style="text-align: center; margin-bottom: 1rem;" id="user-name">Welcome, User!</h2>
+                    <p style="text-align: center; color: #666;" id="user-email">user@example.com</p>
+                </div>
+                
+                <div id="account-tabs" style="display: flex; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 0.75rem;">
+                    <button class="account-tab active" onclick="showAccountSection('profile')" id="profile-tab">Profile</button>
+                    <button class="account-tab" onclick="showAccountSection('orders')" id="orders-tab">Orders</button>
+                    <button class="account-tab" onclick="showAccountSection('addresses')" id="addresses-tab">Addresses</button>
+                    <button class="account-tab" onclick="showAccountSection('settings')" id="settings-tab">Settings</button>
+                </div>
+                
+                <div id="account-profile" class="account-section" style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 1.5rem;">Edit Profile</h3>
+                    <form id="profile-form">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                            <div class="form-group"><label for="profile-name">Full Name</label><input type="text" id="profile-name"></div>
+                            <div class="form-group"><label for="profile-email">Email</label><input type="email" id="profile-email"></div>
+                            <div class="form-group"><label for="profile-phone">Phone</label><input type="tel" id="profile-phone"></div>
+                            <div class="form-group"><label for="profile-birthday">Birthday</label><input type="date" id="profile-birthday"></div>
+                        </div>
+                        <div style="margin-top: 1.5rem;"><button type="button" class="btn" onclick="updateProfile()">Update Profile</button></div>
+                    </form>
+                </div>
+                
+                <div id="account-orders" class="account-section">
+                    <h3 style="margin-bottom: 1.5rem;">Order History</h3>
+                    <div id="order-history"><p style="text-align: center; color: #666; padding: 2rem;">No orders yet. Start shopping!</p></div>
+                </div>
+                
+                <div id="account-addresses" class="account-section" style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 1.5rem;">Saved Addresses</h3>
+                    <div id="addresses-list">
+                        <div style="border: 2px dashed #ddd; padding: 2rem; text-align: center; border-radius: 10px; margin-bottom: 1rem;">
+                            <i class="fas fa-plus" style="font-size: 2rem; color: #667eea; margin-bottom: 1rem;"></i>
+                            <p>Add your first address</p>
+                            <button class="btn" onclick="showAddAddressForm()" style="margin-top: 1rem;">Add Address</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="account-settings" class="account-section" style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 1.5rem;">Account Settings</h3>
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="margin-bottom: 1rem;">Notifications</h4>
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;"><input type="checkbox" id="email-notifications" checked style="margin-right: 0.5rem;"><label for="email-notifications">Email Notifications</label></div>
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;"><input type="checkbox" id="sms-notifications" style="margin-right: 0.5rem;"><label for="sms-notifications">SMS Notifications</label></div>
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem;"><input type="checkbox" id="promotional-emails" checked style="margin-right: 0.5rem;"><label for="promotional-emails">Promotional Emails</label></div>
+                    </div>
+                    
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="margin-bottom: 1rem;">Privacy</h4>
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;"><input type="checkbox" id="data-sharing" style="margin-right: 0.5rem;"><label for="data-sharing">Share data for personalized experience</label></div>
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem;"><input type="checkbox" id="marketing-analytics" style="margin-right: 0.5rem;"><label for="marketing-analytics">Allow marketing analytics</label></div>
+                    </div>
+                    
+                    <div style="border-top: 1px solid #e0e0e0; padding-top: 1.5rem;">
+                        <button class="btn" onclick="saveSettings()">Save Settings</button>
+                        <button class="btn btn-secondary" onclick="changePassword()" style="margin-left: 1rem;">Change Password</button>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn" onclick="showPage('home')">Continue Shopping</button>
+                    <button class="btn btn-secondary" onclick="logout()" style="margin-left: 1rem;">Logout</button>
+                </div>
+            </div>
+
+            <div id="cart" class="page">
+                <h2 style="margin-bottom: 2rem; color: #333;">Shopping Cart</h2>
+                <div id="cart-items"></div>
+                <div class="cart-total" id="cart-total">Total: ₹0</div>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn" onclick="checkout()" id="checkout-btn" disabled>Checkout</button>
+                    <button class="btn btn-secondary" onclick="showPage('home')" style="margin-left: 1rem;">Continue Shopping</button>
+                </div>
+            </div>
+
+            <div id="about" class="page">
+                <h2 style="margin-bottom: 2rem; color: #333;">About RM Store</h2>
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <p style="margin-bottom: 1.5rem; font-size: 1.1rem; line-height: 1.8;">
+                        Welcome to RM Store, your premier destination for high-quality fashion and lifestyle clothing. We are passionate about bringing you the latest trends and timeless classics that help you express your unique style.
+                    </p>
+                    <p style="margin-bottom: 1.5rem; font-size: 1.1rem; line-height: 1.8;">
+                        Founded with a mission to make fashion accessible and enjoyable for everyone, we carefully curate our collection to ensure every piece meets our high standards of quality, comfort, and style.
+                    </p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-top: 2rem;">
+                        <div style="text-align: center;"><i class="fas fa-shipping-fast" style="font-size: 2rem; color: #667eea; margin-bottom: 1rem;"></i><h4>Fast Shipping</h4><p>Free delivery on orders over ₹4,250</p></div>
+                        <div style="text-align: center;"><i class="fas fa-undo" style="font-size: 2rem; color: #667eea; margin-bottom: 1rem;"></i><h4>Easy Returns</h4><p>30-day return policy</p></div>
+                        <div style="text-align: center;"><i class="fas fa-shield-alt" style="font-size: 2rem; color: #667eea; margin-bottom: 1rem;"></i><h4>Secure Payment</h4><p>Your data is safe with us</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // API Base URL
+        const API_URL = 'api.php';
+
+        // Application State
+        let currentUser = null;
+        let products = [];
+        let cart = [];
+        let wishlist = [];
+
+        // --- Core Functions ---
+        async function apiRequest(endpoint, method = 'GET', body = null) {
+            const options = {
+                method,
+                headers: { 'Content-Type': 'application/json' }
+            };
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+            try {
+                const response = await fetch(`${API_URL}/${endpoint}`, options);
+                return await response.json();
+            } catch (error) {
+                console.error('API Request Error:', error);
+                showNotification('Could not connect to the server.', 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            await checkAuthState();
+            await fetchProducts();
+            initializeApp();
+            document.getElementById('account-profile').style.display = 'block';
+        });
+        
+        // --- Navigation ---
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            const newPage = document.getElementById(pageId);
+            if (newPage) {
+                 newPage.classList.add('active');
+            }
+            document.getElementById('nav-menu').classList.remove('active');
+            
+            if (pageId === 'account') {
+                if (!currentUser) {
+                    showPage('login');
+                    showNotification('Please login to access your account', 'warning');
+                    return;
+                }
+                showAccountSection('profile');
+            }
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('nav-menu').classList.toggle('active');
+        }
+
+        // --- Product Functions ---
+        async function fetchProducts() {
+            const data = await apiRequest('products');
+            if (data && Array.isArray(data)) {
+                products = data;
+                renderProducts(products, 'products-grid');
+                renderProducts(products.slice(0, 4), 'featured-products-grid');
+            }
+        }
+        
+        function renderProducts(productsToShow, gridId) {
+            const grid = document.getElementById(gridId);
+            if (!grid) return;
+            grid.innerHTML = '';
+            
+            if (productsToShow.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem; grid-column: 1/-1;">No products found</p>';
+                return;
+            }
+            
+            productsToShow.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                // UPDATED: HTML now uses an <img> tag for product.image_url
+                productCard.innerHTML = `
+                    <div class="product-image-container">
+                        <img src="${product.image_url}" alt="${product.name}" class="product-image">
+                    </div>
+                    <div class="product-info">
+                        <div class="product-info-main">
+                            <h3>${product.name}</h3>
+                            <div class="product-price">₹${parseFloat(product.price).toLocaleString('en-IN')}</div>
+                        </div>
+                        <button class="add-to-cart" onclick="addToCart(${product.id})">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                    </div>`;
+                grid.appendChild(productCard);
+            });
+        }
+
+        // --- Cart Functions ---
+        async function addToCart(productId) {
+            if (!currentUser) {
+                showNotification('Please login to add items to your cart.', 'warning');
+                showPage('login');
+                return;
+            }
+            const response = await apiRequest('cart', 'POST', { productId, quantityChange: 1 });
+            if(response.status === 'success') {
+                const product = products.find(p => p.id === productId);
+                showNotification(`${product.name} added to cart!`);
+                await fetchCart();
+                 const cartBtn = document.querySelector('.cart-btn');
+                cartBtn.classList.add('bounce');
+                setTimeout(() => cartBtn.classList.remove('bounce'), 300);
+            } else {
+                 showNotification(response.message || 'Could not add to cart.', 'error');
+            }
+        }
+
+        async function removeFromCart(productId) {
+            const response = await apiRequest('cart', 'DELETE', { productId });
+            if(response.status === 'success') {
+                showNotification('Item removed from cart');
+                await fetchCart();
+            } else {
+                showNotification(response.message || 'Could not remove item.', 'error');
+            }
+        }
+
+        async function updateQuantity(productId, change) {
+            const response = await apiRequest('cart', 'POST', { productId, quantityChange: change });
+             if(response.status === 'success') {
+                await fetchCart();
+            } else {
+                showNotification(response.message || 'Could not update quantity.', 'error');
+            }
+        }
+        
+        async function fetchCart() {
+            if (!currentUser) return;
+            const data = await apiRequest('cart');
+            if(data && Array.isArray(data)) {
+                cart = data;
+                updateCartDisplay();
+            }
+        }
+
+        function updateCartDisplay() {
+            const cartCount = document.getElementById('cart-count');
+            const cartItems = document.getElementById('cart-items');
+            const cartTotalEl = document.getElementById('cart-total');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            
+            const totalItems = cart.reduce((sum, item) => sum + parseInt(item.quantity), 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (parseFloat(item.price) * parseInt(item.quantity)), 0);
+            
+            cartCount.textContent = totalItems;
+            
+            if (cart.length === 0) {
+                if (cartItems) cartItems.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Your cart is empty</p>';
+                if (checkoutBtn) checkoutBtn.disabled = true;
+            } else {
+                if (cartItems) {
+                    cartItems.innerHTML = cart.map(item => `
+                        <div class="cart-item">
+                            <div><h4>${item.name}</h4><p>₹${parseFloat(item.price).toLocaleString('en-IN')} each</p></div>
+                            <div class="quantity-controls">
+                                <button class="quantity-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
+                                <span style="margin: 0 1rem; font-weight: bold;">${item.quantity}</span>
+                                <button class="quantity-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                                <button class="btn btn-secondary" style="margin-left: 1rem; padding: 0.3rem 0.8rem;" onclick="removeFromCart(${item.id})"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>`).join('');
+                }
+                if (checkoutBtn) checkoutBtn.disabled = false;
+            }
+            
+            if (cartTotalEl) cartTotalEl.textContent = `Total: ₹${totalPrice.toLocaleString('en-IN')}`;
+        }
+
+        async function checkout() {
+            if (!currentUser) {
+                showNotification('Please login to checkout', 'warning');
+                showPage('login');
+                return;
+            }
+            if (cart.length === 0) {
+                showNotification('Your cart is empty', 'warning');
+                return;
+            }
+            
+            const response = await apiRequest('checkout', 'POST');
+            if (response.status === 'success') {
+                showNotification('Order placed successfully!');
+                cart = [];
+                updateCartDisplay();
+                setTimeout(() => {
+                    showPage('account');
+                    showAccountSection('orders'); // Go directly to the orders tab
+                }, 1500);
+            } else {
+                showNotification(response.message || 'Could not place order', 'error');
+            }
+        }
+
+        // --- Authentication ---
+        function showRegister() { showPage('register'); }
+        function showLogin() { showPage('login'); }
+
+        async function checkAuthState() {
+            const authLink = document.getElementById('auth-link');
+            const accountLink = document.getElementById('account-link');
+            const wishlistLink = document.getElementById('wishlist-link');
+            
+            const data = await apiRequest('check_auth');
+            if (data.loggedIn) {
+                currentUser = data.user;
+                authLink.textContent = 'Logout';
+                authLink.onclick = logout;
+                accountLink.style.display = 'block';
+                wishlistLink.style.display = 'block';
+                document.getElementById('user-name').textContent = `Welcome, ${currentUser.name}!`;
+                document.getElementById('user-email').textContent = currentUser.email;
+                await fetchCart();
+                await loadUserProfile(); // Load user details into profile form
+            } else {
+                currentUser = null;
+                authLink.textContent = 'Login';
+                authLink.onclick = () => showPage('login');
+                accountLink.style.display = 'none';
+                wishlistLink.style.display = 'none';
+                cart = [];
+                updateCartDisplay();
+            }
+        }
+
+        document.getElementById('login-form')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const response = await apiRequest('login', 'POST', { email, password });
+            
+            if (response.status === 'success') {
+                showNotification('Login successful!');
+                await checkAuthState();
+                showPage('home');
+            } else {
+                showNotification(response.message || 'Login failed.', 'error');
+            }
+        });
+
+        document.getElementById('register-form')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const phone = document.getElementById('reg-phone').value;
+            
+            const response = await apiRequest('register', 'POST', { name, email, password, phone });
+            
+            if (response.status === 'success') {
+                showNotification('Registration successful! Please login.');
+                showPage('login');
+            } else {
+                showNotification(response.message || 'Registration failed.', 'error');
+            }
+        });
+
+        async function logout() {
+            await apiRequest('logout', 'POST');
+            showNotification('Logged out successfully');
+            await checkAuthState();
+            showPage('home');
+        }
+        
+        // --- Account Page ---
+        function showAccountSection(sectionId) {
+            document.querySelectorAll('.account-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(`account-${sectionId}`).style.display = 'block';
+            
+            const tabsContainer = document.getElementById('account-tabs');
+            tabsContainer.querySelectorAll('.account-tab').forEach(button => {
+                button.classList.remove('active');
+            });
+            document.getElementById(`${sectionId}-tab`).classList.add('active');
+            
+            if (sectionId === 'orders') {
+                fetchOrders();
+            } else if (sectionId === 'profile') {
+                loadUserProfile();
+            }
+        }
+
+        async function loadUserProfile() {
+            if (!currentUser) return;
+            const response = await apiRequest('profile', 'GET');
+            if (response.status === 'success' && response.user) {
+                const user = response.user;
+                document.getElementById('profile-name').value = user.name || '';
+                document.getElementById('profile-email').value = user.email || '';
+                document.getElementById('profile-phone').value = user.phone || '';
+                document.getElementById('profile-birthday').value = user.birthday || '';
+            }
+        }
+
+        async function updateProfile() {
+            const name = document.getElementById('profile-name').value;
+            const email = document.getElementById('profile-email').value;
+            const phone = document.getElementById('profile-phone').value;
+            const birthday = document.getElementById('profile-birthday').value;
+
+            const response = await apiRequest('profile', 'POST', { name, email, phone, birthday });
+
+            if (response.status === 'success') {
+                showNotification('Profile updated successfully!');
+                currentUser.name = response.user.name;
+                currentUser.email = response.user.email;
+                document.getElementById('user-name').textContent = `Welcome, ${currentUser.name}!`;
+                document.getElementById('user-email').textContent = currentUser.email;
+            } else {
+                showNotification(response.message || 'Update failed.', 'error');
+            }
+        }
+        
+        async function fetchOrders() {
+            const orderHistoryContainer = document.getElementById('order-history');
+            orderHistoryContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Loading orders...</p>';
+            const orders = await apiRequest('orders');
+            if (orders && Array.isArray(orders)) {
+                renderOrders(orders);
+            } else {
+                orderHistoryContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Could not load orders.</p>';
+            }
+        }
+
+        function renderOrders(orders) {
+            const container = document.getElementById('order-history');
+            if (orders.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No orders yet. Start shopping!</p>';
+                return;
+            }
+
+            container.innerHTML = orders.map(order => `
+                <div style="background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <h4 style="margin-bottom: 0.25rem;">Order #${order.id}</h4>
+                            <p style="color: #666; font-size: 0.9rem;">Placed on: ${new Date(order.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        </div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: #667eea;">
+                            Total: ₹${parseFloat(order.total).toLocaleString('en-IN')}
+                        </div>
+                    </div>
+                    <div>
+                        ${order.items.map(item => `
+                            <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f7f7f7;">
+                                <span>${item.name} (x${item.quantity})</span>
+                                <span>₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- Miscellaneous ---
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification show';
+            notification.style.background = type === 'error' ? '#f44336' : type === 'warning' ? '#ff9800' : '#4CAF50';
+            setTimeout(() => notification.classList.remove('show'), 3000);
+        }
+
+        function filterByCategory(category) {
+            const filtered = category === 'all' ? products : products.filter(p => p.category === category);
+            renderProducts(filtered, 'products-grid');
+        }
+
+        // Dummy functions that can be expanded
+        function updateWishlistDisplay() { 
+            const wishlistItems = document.getElementById('wishlist-items');
+             if(wishlistItems) wishlistItems.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Your wishlist is empty</p>';
+        }
+        function submitContact() { showNotification('Message sent successfully!'); document.getElementById('contact-form').reset();}
+        function subscribeNewsletter() { showNotification('Thank you for subscribing!'); document.getElementById('newsletter-email').value = ''; }
+        function showAddAddressForm() { showNotification('This feature is coming soon!', 'warning'); }
+        function saveSettings() { showNotification('Settings saved!', 'success'); }
+        function changePassword() { showNotification('Password change functionality is not yet implemented.', 'warning'); }
+
+        function initializeApp() {
+            const searchInput = document.getElementById('search-input');
+            searchInput?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const query = e.target.value.toLowerCase();
+                    const filtered = products.filter(p => p.name.toLowerCase().includes(query));
+                    renderProducts(filtered, 'products-grid');
+                    showPage('products');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
